@@ -2,12 +2,14 @@
 
 import * as React from 'react'
 import Link from 'next/link'
-import { Dumbbell, Menu, LogIn } from 'lucide-react'
+import { Dumbbell, Menu, LogIn, ShoppingBag } from 'lucide-react'
+import { useSession } from '@/lib/session'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 const navLinks = [
   { href: '#actividades', label: 'Actividades' },
+  { href: '/tienda', label: 'Tienda', icon: ShoppingBag },
   { href: '#horarios', label: 'Horarios' },
   { href: '#planes', label: 'Planes' },
   { href: '#contacto', label: 'Contacto' },
@@ -16,6 +18,8 @@ const navLinks = [
 export function SiteHeader() {
   const [scrolled, setScrolled] = React.useState(false)
   const [open, setOpen] = React.useState(false)
+  const { user } = useSession()
+  const visibleNavLinks = navLinks.filter((link) => link.href !== '#horarios' || user)
 
   React.useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12)
@@ -40,7 +44,12 @@ export function SiteHeader() {
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">
-          {navLinks.map((l) => (
+          {visibleNavLinks.map((l) => (
+            l.href === '/tienda' ? (
+              <Link key={l.href} href={l.href} className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+                {l.label}
+              </Link>
+            ) : (
             <a
               key={l.href}
               href={l.href}
@@ -48,6 +57,7 @@ export function SiteHeader() {
             >
               {l.label}
             </a>
+            )
           ))}
         </nav>
 
@@ -71,7 +81,12 @@ export function SiteHeader() {
       {open && (
         <div className="border-b border-border bg-background/95 px-4 pb-4 backdrop-blur-md md:hidden">
           <nav className="flex flex-col gap-1 pt-2">
-            {navLinks.map((l) => (
+            {visibleNavLinks.map((l) => (
+              l.href === '/tienda' ? (
+                <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className="rounded-md px-2 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground">
+                  {l.label}
+                </Link>
+              ) : (
               <a
                 key={l.href}
                 href={l.href}
@@ -80,6 +95,7 @@ export function SiteHeader() {
               >
                 {l.label}
               </a>
+              )
             ))}
             <Link
               href="/login"
