@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { Check, ChevronRight, ShoppingBag, Sparkles, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useSession } from '@/lib/session'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -58,11 +59,16 @@ export default function StorePage() {
   const [payment, setPayment] = React.useState('Efectivo')
   const [success, setSuccess] = React.useState(false)
   const { user } = useSession()
+  const router = useRouter()
 
   const filteredProducts = inventory.filter((product) => category === 'Todos' || product.category === category)
   const bestSellers = inventory.filter((product) => product.popular && product.stock > 0)
 
   const openPurchase = (product: Product) => {
+    if (!user) {
+      router.push('/login?returnTo=/tienda')
+      return
+    }
     setSelected(product)
     setQuantity(1)
     setBuyer('')
@@ -89,7 +95,7 @@ export default function StorePage() {
 
         <div className="mx-auto max-w-6xl px-4 py-8 sm:py-10">
         <Link href="/" className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"><ArrowLeft className="size-4" /> Volver</Link>
-        {!user && <div className="mb-8 rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-foreground">Inicia sesión como miembro del gimnasio para comprar.</div>}
+        {!user && <div className="mb-8 flex flex-col gap-3 rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-foreground sm:flex-row sm:items-center sm:justify-between"><span>Inicia sesión como miembro del gimnasio para comprar.</span><Button size="sm" onClick={() => router.push('/login?returnTo=/tienda')}>Iniciar sesión</Button></div>}
         <div className="mb-10 flex gap-3 overflow-x-auto pb-2" aria-label="Categorías de productos">
           {categories.map((item) => (
             <button key={item.label} onClick={() => setCategory(item.label)} className={cn('min-w-max rounded-xl border px-4 py-3 text-left transition-colors', category === item.label ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-primary/50')}>

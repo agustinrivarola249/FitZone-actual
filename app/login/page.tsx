@@ -47,7 +47,8 @@ export default function LoginPage() {
 
   const handleLogin = (userId: string) => {
     login(userId)
-    router.push('/dashboard')
+    const returnTo = new URLSearchParams(window.location.search).get('returnTo')
+    router.push(returnTo || '/dashboard')
   }
 
   return (

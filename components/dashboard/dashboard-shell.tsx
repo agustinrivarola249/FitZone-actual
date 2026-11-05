@@ -13,6 +13,7 @@ import {
   Bell,
   CreditCard,
   LogOut,
+  ShoppingBag,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -40,19 +41,23 @@ import { SupervisorDashboard } from '@/components/dashboard/supervisor-dashboard
 import { EntrenadorDashboard } from '@/components/dashboard/entrenador-dashboard'
 import { ClienteDashboard } from '@/components/dashboard/cliente-dashboard'
 
-type NavItem = { id: string; label: string; icon: typeof LayoutDashboard }
+type NavItem = { id: string; label: string; icon: typeof LayoutDashboard; href?: string }
 
 function getNav(user: User): NavItem[] {
   if (user.role === 'cliente') {
     return [
       { id: 'clases', label: 'Mis clases', icon: Calendar },
       { id: 'membresia', label: 'Mi membresía', icon: CreditCard },
+      { id: 'horarios', label: 'Horarios de clases', icon: Clock, href: '/horarios' },
+      { id: 'tienda', label: 'Tienda', icon: ShoppingBag, href: '/tienda' },
     ]
   }
   if (user.subRole === 'entrenador') {
     return [
       { id: 'clases', label: 'Mis clases', icon: Calendar },
       { id: 'sesiones', label: 'Registrar sesiones', icon: ClipboardList },
+      { id: 'horarios', label: 'Horarios de clases', icon: Clock, href: '/horarios' },
+      { id: 'tienda', label: 'Tienda', icon: ShoppingBag, href: '/tienda' },
     ]
   }
   // supervisor / recepcionista
@@ -60,8 +65,9 @@ function getNav(user: User): NavItem[] {
     { id: 'reportes', label: 'Reportes', icon: LayoutDashboard },
     { id: 'empleados', label: 'Empleados', icon: Users },
     { id: 'aprobaciones', label: 'Aprobaciones', icon: ClipboardCheck },
-    { id: 'horarios', label: 'Horarios de clases', icon: Clock },
+    { id: 'horarios', label: 'Horarios de clases', icon: Clock, href: '/horarios' },
     { id: 'recordatorios', label: 'Recordatorios', icon: Bell },
+    { id: 'tienda', label: 'Tienda', icon: ShoppingBag, href: '/tienda' },
   ]
 }
 
@@ -128,7 +134,7 @@ function DashboardContent() {
                   <SidebarMenuItem key={item.id}>
                     <SidebarMenuButton
                       isActive={item.id === section}
-                      onClick={() => setSection(item.id)}
+                      onClick={() => item.href ? router.push(item.href) : setSection(item.id)}
                     >
                       <item.icon />
                       <span>{item.label}</span>
@@ -160,15 +166,23 @@ function DashboardContent() {
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-3 border-b border-border px-4">
           <SidebarTrigger />
-          <div className="flex flex-1 items-center justify-between gap-3">
+            <div className="flex flex-1 items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <h1 className="font-display text-xl font-bold uppercase tracking-wide">
                 {activeItem?.label}
               </h1>
             </div>
-            <Badge variant="secondary" className="capitalize">
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => router.push('/horarios')}>
+                <Clock data-icon="inline-start" /> Horarios
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => router.push('/tienda')}>
+                <ShoppingBag data-icon="inline-start" /> Tienda
+              </Button>
+              <Badge variant="secondary" className="capitalize">
               {roleLabel(user)}
-            </Badge>
+              </Badge>
+            </div>
           </div>
         </header>
 
