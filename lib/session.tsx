@@ -18,7 +18,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = React.useState(false)
 
   React.useEffect(() => {
-    const stored = sessionStorage.getItem(STORAGE_KEY)
+    const stored = localStorage.getItem(STORAGE_KEY)
     if (stored) {
       const found = users.find((u) => u.id === stored)
       if (found) setUser(found)
@@ -29,13 +29,13 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const login = React.useCallback((userId: string) => {
     const found = users.find((u) => u.id === userId) ?? null
     setUser(found)
-    if (found) sessionStorage.setItem(STORAGE_KEY, found.id)
+    if (found) localStorage.setItem(STORAGE_KEY, found.id)
     return found
   }, [])
 
   const logout = React.useCallback(() => {
     setUser(null)
-    sessionStorage.removeItem(STORAGE_KEY)
+    localStorage.removeItem(STORAGE_KEY)
   }, [])
 
   const value = React.useMemo(

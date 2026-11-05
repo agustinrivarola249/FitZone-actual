@@ -81,6 +81,8 @@ export default function StorePage() {
     setSuccess(true)
   }
 
+  const backHref = user ? '/dashboard' : '/'
+
   return (
     <main className="min-h-screen bg-background pt-16">
       <section className="border-b border-border bg-card/60">
@@ -94,7 +96,7 @@ export default function StorePage() {
       </section>
 
         <div className="mx-auto max-w-6xl px-4 py-8 sm:py-10">
-        <Link href="/" className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"><ArrowLeft className="size-4" /> Volver</Link>
+        <Link href={backHref} className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"><ArrowLeft className="size-4" /> Volver</Link>
         {!user && <div className="mb-8 flex flex-col gap-3 rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-foreground sm:flex-row sm:items-center sm:justify-between"><span>Inicia sesión como miembro del gimnasio para comprar.</span><Button size="sm" onClick={() => router.push('/login?returnTo=/tienda')}>Iniciar sesión</Button></div>}
         <div className="mb-10 flex gap-3 overflow-x-auto pb-2" aria-label="Categorías de productos">
           {categories.map((item) => (
@@ -135,5 +137,5 @@ export default function StorePage() {
 }
 
 function ProductCard({ product, onBuy, canBuy }: { product: Product; onBuy: (product: Product) => void; canBuy: boolean }) {
-  return <article className="group overflow-hidden rounded-2xl border border-border bg-card transition-all hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5"><div className="relative aspect-[1.15] overflow-hidden bg-muted"><Image src={product.image} alt={product.name} fill className="object-cover transition-transform duration-500 group-hover:scale-105" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" />{product.popular && <span className="absolute left-3 top-3 rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground">Más vendido</span>}</div><div className="flex min-h-[205px] flex-col p-4"><div><p className="text-xs font-medium uppercase tracking-wider text-primary">{product.category}</p><h3 className="mt-1 text-lg font-semibold">{product.name}</h3><p className="mt-1 line-clamp-2 text-sm leading-5 text-muted-foreground">{product.description}</p></div><div className="mt-auto pt-5"><div className="mb-3 flex items-end justify-between gap-2"><div><p className="text-xs text-muted-foreground">Stock: <span className={product.stock <= 5 ? 'font-semibold text-amber-400' : 'text-foreground'}>{product.stock} unidades</span></p><p className="mt-1 text-xl font-bold">{formatPrice(product.price)}</p></div><Button size="sm" onClick={() => onBuy(product)} disabled={!canBuy || product.stock === 0}><ShoppingBag data-icon="inline-start" /> {canBuy ? 'Comprar' : 'Inicia sesión'}</Button></div></div></div></article>
+  return <article className="group overflow-hidden rounded-2xl border border-border bg-card transition-all hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5"><div className="relative aspect-[1.15] overflow-hidden bg-muted"><Image src={product.image} alt={product.name} fill className="object-cover transition-transform duration-500 group-hover:scale-105" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" />{product.popular && <span className="absolute left-3 top-3 rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground">Más vendido</span>}</div><div className="flex min-h-[205px] flex-col p-4"><div><p className="text-xs font-medium uppercase tracking-wider text-primary">{product.category}</p><h3 className="mt-1 text-lg font-semibold">{product.name}</h3><p className="mt-1 line-clamp-2 text-sm leading-5 text-muted-foreground">{product.description}</p></div><div className="mt-auto pt-5"><div className="mb-3 flex items-end justify-between gap-2"><div><p className="text-xs text-muted-foreground">Stock: <span className={product.stock <= 5 ? 'font-semibold text-amber-400' : 'text-foreground'}>{product.stock} unidades</span></p><p className="mt-1 text-xl font-bold">{formatPrice(product.price)}</p></div><Button size="sm" onClick={() => onBuy(product)} disabled={product.stock === 0}><ShoppingBag data-icon="inline-start" /> {canBuy ? 'Comprar' : 'Iniciar sesión'}</Button></div></div></div></article>
 }
