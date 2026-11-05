@@ -17,6 +17,7 @@ type GymStore = {
   classes: GymClass[]
   requests: ChangeRequest[]
   toggleEmployeeActive: (id: string) => void
+  toggleClientActive: (id: string) => void
   setEmployeeSubRole: (id: string, subRole: SubRole) => void
   addEmployee: (data: { name: string; email: string; subRole: SubRole }) => void
   updateClass: (id: string, patch: Partial<GymClass>) => void
@@ -30,10 +31,12 @@ export function GymDataProvider({ children }: { children: React.ReactNode }) {
   const [staff, setStaff] = React.useState<User[]>(
     seedUsers.filter((u) => u.role === 'empleado').map((u) => ({ ...u })),
   )
-  const clients = React.useMemo(
-    () => seedUsers.filter((u) => u.role === 'cliente').map((u) => ({ ...u })),
-    [],
-  )
+  const [clients, setClients] = React.useState<User[]>(() => {
+    const inactive = typeof window === 'undefined' ? [] : JSON.parse(localStorage.getItem('fitzone.inactive.clients') ?? '[]') as string[]
+    return seedUsers
+      .filter((u) => u.role === 'cliente')
+      .map((u) => ({ ...u, active: !inactive.includes(u.id) }))
+  })
   const [classes, setClasses] = React.useState<GymClass[]>(seedClasses.map((c) => ({ ...c })))
   const [requests, setRequests] = React.useState<ChangeRequest[]>(
     seedRequests.map((r) => ({ ...r })),
@@ -41,6 +44,15 @@ export function GymDataProvider({ children }: { children: React.ReactNode }) {
 
   const toggleEmployeeActive = React.useCallback((id: string) => {
     setStaff((prev) => prev.map((e) => (e.id === id ? { ...e, active: !e.active } : e)))
+  }, [])
+
+  const toggleClientActive = React.useCallback((id: string) => {
+    setClients((prev) => {
+      const next = prev.map((client) => (client.id === id ? { ...client, active: !client.active } : client))
+      const inactive = next.filter((client) => !client.active).map((client) => client.id)
+      localStorage.setItem('fitzone.inactive.clients', JSON.stringify(inactive))
+      return next
+    })
   }, [])
 
   const setEmployeeSubRole = React.useCallback((id: string, subRole: SubRole) => {
@@ -101,6 +113,7 @@ export function GymDataProvider({ children }: { children: React.ReactNode }) {
       classes,
       requests,
       toggleEmployeeActive,
+      toggleClientActive,
       setEmployeeSubRole,
       addEmployee,
       updateClass,
@@ -113,6 +126,7 @@ export function GymDataProvider({ children }: { children: React.ReactNode }) {
       classes,
       requests,
       toggleEmployeeActive,
+      toggleClientActive,
       setEmployeeSubRole,
       addEmployee,
       updateClass,

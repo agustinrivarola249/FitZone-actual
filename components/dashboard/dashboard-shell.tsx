@@ -63,8 +63,9 @@ function getNav(user: User): NavItem[] {
   // supervisor / recepcionista
   return [
     { id: 'reportes', label: 'Reportes', icon: LayoutDashboard },
-    { id: 'empleados', label: 'Empleados', icon: Users },
-    { id: 'aprobaciones', label: 'Aprobaciones', icon: ClipboardCheck },
+      { id: 'empleados', label: 'Empleados', icon: Users },
+      { id: 'clientes', label: 'Clientes', icon: Users },
+      { id: 'aprobaciones', label: 'Aprobaciones', icon: ClipboardCheck },
     { id: 'horarios', label: 'Horarios de clases', icon: Clock, href: '/horarios' },
     { id: 'recordatorios', label: 'Recordatorios', icon: Bell },
     { id: 'tienda', label: 'Tienda', icon: ShoppingBag, href: '/tienda' },

@@ -12,6 +12,13 @@ type SessionContextValue = {
 
 const SessionContext = React.createContext<SessionContextValue | null>(null)
 const STORAGE_KEY = 'fitzone.session.userId'
+const INACTIVE_CLIENTS_KEY = 'fitzone.inactive.clients'
+
+function isInactiveClient(userId: string) {
+  if (typeof window === 'undefined') return false
+  const inactive = JSON.parse(localStorage.getItem(INACTIVE_CLIENTS_KEY) ?? '[]') as string[]
+  return inactive.includes(userId)
+}
 
 export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = React.useState<User | null>(null)
@@ -21,13 +28,15 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     const stored = localStorage.getItem(STORAGE_KEY)
     if (stored) {
       const found = users.find((u) => u.id === stored)
-      if (found) setUser(found)
+      if (found && !isInactiveClient(found.id)) setUser(found)
+      else if (found) localStorage.removeItem(STORAGE_KEY)
     }
     setReady(true)
   }, [])
 
   const login = React.useCallback((userId: string) => {
     const found = users.find((u) => u.id === userId) ?? null
+    if (found && isInactiveClient(found.id)) return null
     setUser(found)
     if (found) localStorage.setItem(STORAGE_KEY, found.id)
     return found

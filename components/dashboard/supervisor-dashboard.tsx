@@ -341,6 +341,74 @@ function Empleados() {
   )
 }
 
+function Clientes() {
+  const { clients, toggleClientActive } = useGymStore()
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Gestión de clientes</CardTitle>
+        <CardDescription>Administrá el acceso y el estado de las membresías.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Cliente</TableHead>
+                <TableHead>Correo</TableHead>
+                <TableHead>Membresía</TableHead>
+                <TableHead>Estado</TableHead>
+                <TableHead className="text-right">Acciones</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {clients.map((client) => {
+                const membership = memberships.find((item) => item.clientId === client.id)
+                return (
+                  <TableRow key={client.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="size-8">
+                          <AvatarFallback className="bg-primary/15 text-primary text-xs">
+                            {client.avatarInitials}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium">{client.name}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{client.email}</TableCell>
+                    <TableCell>{membership?.plan ?? 'Sin membresía'}</TableCell>
+                    <TableCell>
+                      <Badge variant={client.active ? 'default' : 'secondary'}>
+                        {client.active ? 'Activo' : 'Dado de baja'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant={client.active ? 'destructive' : 'outline'}
+                        size="sm"
+                        onClick={() => {
+                          toggleClientActive(client.id)
+                          toast.success(
+                            client.active ? `${client.name} dado de baja` : `${client.name} reactivado`,
+                          )
+                        }}
+                      >
+                        {client.active ? 'Dar de baja' : 'Reactivar'}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 function Aprobaciones() {
   const { requests, resolveRequest } = useGymStore()
   const pending = requests.filter((r) => r.status === 'pendiente')
@@ -574,6 +642,7 @@ function Recordatorios() {
 
 export function SupervisorDashboard({ section }: { section: string }) {
   if (section === 'empleados') return <Empleados />
+  if (section === 'clientes') return <Clientes />
   if (section === 'aprobaciones') return <Aprobaciones />
   if (section === 'horarios') return <Horarios />
   if (section === 'recordatorios') return <Recordatorios />

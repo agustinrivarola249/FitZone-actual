@@ -37,6 +37,7 @@ export default function LoginPage() {
   const router = useRouter()
   const { login } = useSession()
   const [selected, setSelected] = React.useState<RoleOption | null>(null)
+  const [loginError, setLoginError] = React.useState('')
 
   const candidates = React.useMemo(() => {
     if (!selected) return []
@@ -46,7 +47,12 @@ export default function LoginPage() {
   }, [selected])
 
   const handleLogin = (userId: string) => {
-    login(userId)
+    const loggedUser = login(userId)
+    if (!loggedUser) {
+      setLoginError('Tu cuenta está dada de baja. Contacta al gimnasio para reactivarla.')
+      return
+    }
+    setLoginError('')
     const returnTo = new URLSearchParams(window.location.search).get('returnTo')
     router.push(returnTo || '/dashboard')
   }
@@ -126,6 +132,12 @@ export default function LoginPage() {
               )
             })}
           </div>
+
+          {loginError && (
+            <p role="alert" className="mt-6 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+              {loginError}
+            </p>
+          )}
 
           {selected && (
             <div className="mt-6">
