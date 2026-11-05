@@ -11,7 +11,7 @@ const oswald = Oswald({ subsets: ['latin'], variable: '--font-oswald' })
 export const metadata: Metadata = {
   title: 'FitZone — Rompé la rutina',
   description:
-    'FitZone, tu gimnasio. Musculación, Crossfit, Pilates, Funcional y clases grupales. Sumate hoy y superate cada día.',
+    'FitZone, tu gimnasio. Musculación, Crossfit, Pilates, Funcional, clases grupales y tienda deportiva.',
   generator: 'v0.app',
 }
 

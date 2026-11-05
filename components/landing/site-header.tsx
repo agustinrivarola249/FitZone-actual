@@ -2,12 +2,13 @@
 
 import * as React from 'react'
 import Link from 'next/link'
-import { Dumbbell, Menu, LogIn } from 'lucide-react'
+import { Dumbbell, Menu, LogIn, ShoppingBag } from 'lucide-react'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 const navLinks = [
   { href: '#actividades', label: 'Actividades' },
+  { href: '/tienda', label: 'Tienda', icon: ShoppingBag },
   { href: '#horarios', label: 'Horarios' },
   { href: '#planes', label: 'Planes' },
   { href: '#contacto', label: 'Contacto' },
