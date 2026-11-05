@@ -2,7 +2,9 @@
 
 import * as React from 'react'
 import Image from 'next/image'
-import { Check, ChevronRight, ShoppingBag, Sparkles } from 'lucide-react'
+import { Check, ChevronRight, ShoppingBag, Sparkles, ArrowLeft } from 'lucide-react'
+import Link from 'next/link'
+import { useSession } from '@/lib/session'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -55,6 +57,7 @@ export default function StorePage() {
   const [buyer, setBuyer] = React.useState('')
   const [payment, setPayment] = React.useState('Efectivo')
   const [success, setSuccess] = React.useState(false)
+  const { user } = useSession()
 
   const filteredProducts = inventory.filter((product) => category === 'Todos' || product.category === category)
   const bestSellers = inventory.filter((product) => product.popular && product.stock > 0)
@@ -84,7 +87,9 @@ export default function StorePage() {
         </div>
       </section>
 
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:py-10">
+        <div className="mx-auto max-w-6xl px-4 py-8 sm:py-10">
+        <Link href="/" className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"><ArrowLeft className="size-4" /> Volver</Link>
+        {!user && <div className="mb-8 rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-foreground">Inicia sesión como miembro del gimnasio para comprar.</div>}
         <div className="mb-10 flex gap-3 overflow-x-auto pb-2" aria-label="Categorías de productos">
           {categories.map((item) => (
             <button key={item.label} onClick={() => setCategory(item.label)} className={cn('min-w-max rounded-xl border px-4 py-3 text-left transition-colors', category === item.label ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-primary/50')}>
@@ -96,13 +101,13 @@ export default function StorePage() {
         {category === 'Todos' && (
           <section className="mb-12">
             <div className="mb-5 flex items-end justify-between"><div><p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">Lo que todos eligen</p><h2 className="mt-1 font-display text-3xl font-bold uppercase sm:text-4xl">Productos más vendidos</h2></div><span className="hidden text-sm text-muted-foreground sm:block">Selección FitZone</span></div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{bestSellers.map((product) => <ProductCard key={product.id} product={product} onBuy={openPurchase} />)}</div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{bestSellers.map((product) => <ProductCard key={product.id} product={product} onBuy={openPurchase} canBuy={Boolean(user)} />)}</div>
           </section>
         )}
 
         <section>
           <div className="mb-5 flex items-end justify-between"><div><p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">{category === 'Todos' ? 'Explorá el catálogo' : 'Catálogo'}</p><h2 className="mt-1 font-display text-3xl font-bold uppercase sm:text-4xl">{category === 'Todos' ? 'Todos los productos' : category}</h2></div><span className="text-sm text-muted-foreground">{filteredProducts.length} productos</span></div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{filteredProducts.map((product) => <ProductCard key={product.id} product={product} onBuy={openPurchase} />)}</div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{filteredProducts.map((product) => <ProductCard key={product.id} product={product} onBuy={openPurchase} canBuy={Boolean(user)} />)}</div>
         </section>
       </div>
 
@@ -123,6 +128,6 @@ export default function StorePage() {
   )
 }
 
-function ProductCard({ product, onBuy }: { product: Product; onBuy: (product: Product) => void }) {
-  return <article className="group overflow-hidden rounded-2xl border border-border bg-card transition-all hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5"><div className="relative aspect-[1.15] overflow-hidden bg-muted"><Image src={product.image} alt={product.name} fill className="object-cover transition-transform duration-500 group-hover:scale-105" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" />{product.popular && <span className="absolute left-3 top-3 rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground">Más vendido</span>}</div><div className="flex min-h-[205px] flex-col p-4"><div><p className="text-xs font-medium uppercase tracking-wider text-primary">{product.category}</p><h3 className="mt-1 text-lg font-semibold">{product.name}</h3><p className="mt-1 line-clamp-2 text-sm leading-5 text-muted-foreground">{product.description}</p></div><div className="mt-auto pt-5"><div className="mb-3 flex items-end justify-between gap-2"><div><p className="text-xs text-muted-foreground">Stock: <span className={product.stock <= 5 ? 'font-semibold text-amber-400' : 'text-foreground'}>{product.stock} unidades</span></p><p className="mt-1 text-xl font-bold">{formatPrice(product.price)}</p></div><Button size="sm" onClick={() => onBuy(product)} disabled={product.stock === 0}><ShoppingBag data-icon="inline-start" /> Comprar</Button></div></div></div></article>
+function ProductCard({ product, onBuy, canBuy }: { product: Product; onBuy: (product: Product) => void; canBuy: boolean }) {
+  return <article className="group overflow-hidden rounded-2xl border border-border bg-card transition-all hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5"><div className="relative aspect-[1.15] overflow-hidden bg-muted"><Image src={product.image} alt={product.name} fill className="object-cover transition-transform duration-500 group-hover:scale-105" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" />{product.popular && <span className="absolute left-3 top-3 rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground">Más vendido</span>}</div><div className="flex min-h-[205px] flex-col p-4"><div><p className="text-xs font-medium uppercase tracking-wider text-primary">{product.category}</p><h3 className="mt-1 text-lg font-semibold">{product.name}</h3><p className="mt-1 line-clamp-2 text-sm leading-5 text-muted-foreground">{product.description}</p></div><div className="mt-auto pt-5"><div className="mb-3 flex items-end justify-between gap-2"><div><p className="text-xs text-muted-foreground">Stock: <span className={product.stock <= 5 ? 'font-semibold text-amber-400' : 'text-foreground'}>{product.stock} unidades</span></p><p className="mt-1 text-xl font-bold">{formatPrice(product.price)}</p></div><Button size="sm" onClick={() => onBuy(product)} disabled={!canBuy || product.stock === 0}><ShoppingBag data-icon="inline-start" /> {canBuy ? 'Comprar' : 'Inicia sesión'}</Button></div></div></div></article>
 }

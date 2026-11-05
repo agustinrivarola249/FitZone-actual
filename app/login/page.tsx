@@ -84,7 +84,7 @@ export default function LoginPage() {
             className="mb-8 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="size-4" />
-            Volver al inicio
+            Volver
           </Link>
 
           <h1 className="font-display text-3xl font-bold uppercase tracking-tight">
