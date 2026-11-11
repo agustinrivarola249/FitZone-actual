@@ -26,11 +26,34 @@ type GymStore = {
 }
 
 const GymContext = React.createContext<GymStore | null>(null)
+const STAFF_STORAGE_KEY = 'fitzone.staff'
 
 export function GymDataProvider({ children }: { children: React.ReactNode }) {
   const [staff, setStaff] = React.useState<User[]>(
     seedUsers.filter((u) => u.role === 'empleado').map((u) => ({ ...u })),
   )
+  const [staffStorageReady, setStaffStorageReady] = React.useState(false)
+
+  React.useEffect(() => {
+    try {
+      const stored = localStorage.getItem(STAFF_STORAGE_KEY)
+      if (stored) {
+        const savedStaff = JSON.parse(stored) as User[]
+        const seededStaff = seedUsers.filter((user) => user.role === 'empleado')
+        setStaff([
+          ...seededStaff.map((seed) => savedStaff.find((user) => user.id === seed.id) ?? seed),
+          ...savedStaff.filter((user) => !seededStaff.some((seed) => seed.id === user.id)),
+        ])
+      }
+    } catch {
+      localStorage.removeItem(STAFF_STORAGE_KEY)
+    }
+    setStaffStorageReady(true)
+  }, [])
+
+  React.useEffect(() => {
+    if (staffStorageReady) localStorage.setItem(STAFF_STORAGE_KEY, JSON.stringify(staff))
+  }, [staff, staffStorageReady])
   const [clients, setClients] = React.useState<User[]>(() => {
     const inactive = typeof window === 'undefined' ? [] : JSON.parse(localStorage.getItem('fitzone.inactive.clients') ?? '[]') as string[]
     return seedUsers

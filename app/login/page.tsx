@@ -38,18 +38,38 @@ export default function LoginPage() {
   const { login } = useSession()
   const [selected, setSelected] = React.useState<RoleOption | null>(null)
   const [loginError, setLoginError] = React.useState('')
+  const [availableUsers, setAvailableUsers] = React.useState(users)
+
+  React.useEffect(() => {
+    try {
+      const savedStaff = JSON.parse(localStorage.getItem('fitzone.staff') ?? '[]') as typeof users
+      const seededStaff = users.filter((user) => user.role === 'empleado')
+      setAvailableUsers([
+        ...users.filter((user) => user.role !== 'empleado'),
+        ...seededStaff.map((seed) => savedStaff.find((user) => user.id === seed.id) ?? seed),
+        ...savedStaff.filter((user) => !seededStaff.some((seed) => seed.id === user.id)),
+      ])
+    } catch {
+      localStorage.removeItem('fitzone.staff')
+    }
+  }, [])
 
   const candidates = React.useMemo(() => {
     if (!selected) return []
-    return users.filter(
+    return availableUsers.filter(
       (u) => u.role === selected.role && (!selected.subRole || u.subRole === selected.subRole),
     )
-  }, [selected])
+  }, [selected, availableUsers])
 
   const handleLogin = (userId: string) => {
     const loggedUser = login(userId)
     if (!loggedUser) {
-      setLoginError('Tu cuenta está dada de baja. Contacta al gimnasio para reactivarla.')
+      const attemptedUser = availableUsers.find((user) => user.id === userId)
+      setLoginError(
+        attemptedUser?.role === 'empleado'
+          ? 'Tu cuenta está desactivada. Contacta al supervisor.'
+          : 'Tu cuenta está dada de baja. Contacta al gimnasio para reactivarla.',
+      )
       return
     }
     setLoginError('')
