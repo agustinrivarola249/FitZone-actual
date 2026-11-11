@@ -21,10 +21,12 @@ export default function HorariosPage() {
     return <div className="flex min-h-screen items-center justify-center bg-background"><Skeleton className="size-12 rounded-full" /></div>
   }
 
+  const backHref = '/dashboard'
+
   return (
     <main className="min-h-screen bg-background px-4 pb-12 pt-24">
       <div className="mx-auto max-w-6xl">
-        <Link href="/" className="mb-8 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+        <Link href={backHref} className="mb-8 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="size-4" /> Volver
         </Link>
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
