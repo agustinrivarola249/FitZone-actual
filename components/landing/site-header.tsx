@@ -12,7 +12,6 @@ const navLinks = [
   { href: '/tienda', label: 'Tienda', icon: ShoppingBag },
   { href: '#horarios', label: 'Horarios' },
   { href: '#planes', label: 'Planes' },
-  { href: '#contacto', label: 'Contacto' },
 ]
 
 export function SiteHeader() {
