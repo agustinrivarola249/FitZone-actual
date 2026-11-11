@@ -12,6 +12,16 @@ import { gymClasses, trainerName } from '@/lib/mock-data'
 export default function HorariosPage() {
   const router = useRouter()
   const { user, ready } = useSession()
+  const [classes, setClasses] = React.useState(gymClasses)
+
+  React.useEffect(() => {
+    try {
+      const savedClasses = JSON.parse(localStorage.getItem('fitzone.classes') ?? '[]') as typeof gymClasses
+      if (savedClasses.length) setClasses(savedClasses)
+    } catch {
+      localStorage.removeItem('fitzone.classes')
+    }
+  }, [])
 
   React.useEffect(() => {
     if (ready && !user) router.replace('/login')
@@ -44,7 +54,7 @@ export default function HorariosPage() {
                 <tr><th className="px-5 py-4">Clase</th><th className="px-5 py-4">Entrenador</th><th className="px-5 py-4">Día</th><th className="px-5 py-4">Hora</th><th className="px-5 py-4">Sala</th></tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {gymClasses.map((item) => <tr key={item.id} className="transition-colors hover:bg-muted/30"><td className="px-5 py-4 font-semibold">{item.name}<span className="mt-1 block text-xs font-normal text-muted-foreground">{item.activity}</span></td><td className="px-5 py-4">{trainerName(item.trainerId)}</td><td className="px-5 py-4">{item.day}</td><td className="px-5 py-4 whitespace-nowrap">{item.start} – {item.end}</td><td className="px-5 py-4 text-muted-foreground">{item.room}</td></tr>)}
+                {classes.map((item) => <tr key={item.id} className="transition-colors hover:bg-muted/30"><td className="px-5 py-4 font-semibold">{item.name}<span className="mt-1 block text-xs font-normal text-muted-foreground">{item.activity}</span></td><td className="px-5 py-4">{trainerName(item.trainerId)}</td><td className="px-5 py-4">{item.day}</td><td className="px-5 py-4 whitespace-nowrap">{item.start} – {item.end}</td><td className="px-5 py-4 text-muted-foreground">{item.room}</td></tr>)}
               </tbody>
             </table>
           </div>

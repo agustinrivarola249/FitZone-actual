@@ -53,6 +53,7 @@ import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { toast } from 'sonner'
 import { useGymStore } from '@/lib/gym-store'
+import { useSession } from '@/lib/session'
 import { memberships, className_, trainerName, type SubRole } from '@/lib/mock-data'
 import { ClassEditDialog } from '@/components/dashboard/class-edit-dialog'
 
@@ -87,8 +88,12 @@ function StatCard({
 
 function Reportes() {
   const { classes, clients } = useGymStore()
+  const activeClients = clients.filter((client) => client.active)
+  const activeClientIds = new Set(activeClients.map((client) => client.id))
+  const activeMemberships = memberships.filter((membership) => activeClientIds.has(membership.clientId))
+  const inactiveClients = clients.length - activeClients.length
 
-  const ingresos = memberships.reduce((sum, m) => sum + m.price, 0)
+  const ingresos = activeMemberships.reduce((sum, membership) => sum + membership.price, 0)
   const asistencia = classes.reduce((sum, c) => sum + c.enrolled, 0)
   const ocupacion = Math.round(
     (classes.reduce((sum, c) => sum + c.enrolled / c.capacity, 0) / classes.length) * 100,
@@ -105,8 +110,8 @@ function Reportes() {
         />
         <StatCard
           label="Clientes activos"
-          value={String(clients.length)}
-          hint="Con membresía vigente"
+          value={String(activeClients.length)}
+          hint={`${inactiveClients} dados de baja · ${clients.length} inscritos`}
           icon={Users}
         />
         <StatCard
@@ -154,10 +159,10 @@ function Reportes() {
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             {Object.entries(
-              memberships.reduce<Record<string, { count: number; total: number }>>((acc, m) => {
-                acc[m.plan] = acc[m.plan] ?? { count: 0, total: 0 }
-                acc[m.plan].count += 1
-                acc[m.plan].total += m.price
+              activeMemberships.reduce<Record<string, { count: number; total: number }>>((acc, membership) => {
+                acc[membership.plan] = acc[membership.plan] ?? { count: 0, total: 0 }
+                acc[membership.plan].count += 1
+                acc[membership.plan].total += membership.price
                 return acc
               }, {}),
             ).map(([plan, data]) => (
@@ -184,8 +189,10 @@ function Reportes() {
 const subRoles: SubRole[] = ['entrenador', 'supervisor']
 
 function Empleados() {
-  const { staff, toggleEmployeeActive, setEmployeeSubRole, addEmployee } = useGymStore()
+  const { staff, toggleEmployeeActive, setEmployeeSubRole, addEmployee, deleteEmployee } = useGymStore()
+  const { user } = useSession()
   const [open, setOpen] = React.useState(false)
+  const [employeeToDelete, setEmployeeToDelete] = React.useState<(typeof staff)[number] | null>(null)
   const [name, setName] = React.useState('')
   const [email, setEmail] = React.useState('')
   const [subRole, setSubRole] = React.useState<SubRole>('entrenador')
@@ -262,6 +269,35 @@ function Empleados() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        <Dialog
+          open={Boolean(employeeToDelete)}
+          onOpenChange={(isOpen) => {
+            if (!isOpen) setEmployeeToDelete(null)
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Eliminar entrenador</DialogTitle>
+              <DialogDescription>
+                ¿Seguro que quieres eliminar a este entrenador? Esta acción no se puede deshacer
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <DialogClose render={<Button variant="outline">Cancelar</Button>} />
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  if (!employeeToDelete || !user) return
+                  deleteEmployee(employeeToDelete.id, user.id)
+                  toast.success(`${employeeToDelete.name} eliminado`)
+                  setEmployeeToDelete(null)
+                }}
+              >
+                Eliminar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
@@ -318,18 +354,29 @@ function Empleados() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      variant={emp.active ? 'destructive' : 'outline'}
-                      size="sm"
-                      onClick={() => {
-                        toggleEmployeeActive(emp.id)
-                        toast.success(
-                          emp.active ? `${emp.name} dado de baja` : `${emp.name} reactivado`,
-                        )
-                      }}
-                    >
-                      {emp.active ? 'Dar de baja' : 'Reactivar'}
-                    </Button>
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant={emp.active ? 'destructive' : 'outline'}
+                        size="sm"
+                        onClick={() => {
+                          toggleEmployeeActive(emp.id)
+                          toast.success(
+                            emp.active ? `${emp.name} dado de baja` : `${emp.name} reactivado`,
+                          )
+                        }}
+                      >
+                        {emp.active ? 'Dar de baja' : 'Reactivar'}
+                      </Button>
+                      {emp.subRole === 'entrenador' && emp.id !== user?.id && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setEmployeeToDelete(emp)}
+                        >
+                          Eliminar
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
