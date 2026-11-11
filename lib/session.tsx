@@ -14,6 +14,7 @@ const SessionContext = React.createContext<SessionContextValue | null>(null)
 const STORAGE_KEY = 'fitzone.session.userId'
 const INACTIVE_CLIENTS_KEY = 'fitzone.inactive.clients'
 const STAFF_STORAGE_KEY = 'fitzone.staff'
+const DELETED_STAFF_KEY = 'fitzone.deleted.staff'
 
 function isAccountActive(user: User) {
   if (typeof window === 'undefined') return true
@@ -24,6 +25,8 @@ function isAccountActive(user: User) {
   }
 
   if (user.role === 'empleado') {
+    const deletedStaffIds = JSON.parse(localStorage.getItem(DELETED_STAFF_KEY) ?? '[]') as string[]
+    if (deletedStaffIds.includes(user.id)) return false
     const staff = JSON.parse(localStorage.getItem(STAFF_STORAGE_KEY) ?? '[]') as User[]
     const savedUser = staff.find((employee) => employee.id === user.id)
     return savedUser ? savedUser.active : user.active
@@ -35,6 +38,9 @@ function isAccountActive(user: User) {
 function resolveUser(userId: string) {
   const seededUser = users.find((user) => user.id === userId)
   if (typeof window === 'undefined') return seededUser
+
+  const deletedStaffIds = JSON.parse(localStorage.getItem(DELETED_STAFF_KEY) ?? '[]') as string[]
+  if (deletedStaffIds.includes(userId)) return undefined
 
   if (seededUser?.role === 'empleado') {
     const staff = JSON.parse(localStorage.getItem(STAFF_STORAGE_KEY) ?? '[]') as User[]

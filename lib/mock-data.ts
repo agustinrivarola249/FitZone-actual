@@ -98,7 +98,7 @@ export const activities = [
 ]
 
 export function trainerName(id: string) {
-  return users.find((u) => u.id === id)?.name ?? 'Sin asignar'
+  return id ? users.find((u) => u.id === id)?.name ?? 'Sin asignar' : 'Sin entrenador asignado'
 }
 
 export function clientName(id: string) {

@@ -43,11 +43,12 @@ export default function LoginPage() {
   React.useEffect(() => {
     try {
       const savedStaff = JSON.parse(localStorage.getItem('fitzone.staff') ?? '[]') as typeof users
-      const seededStaff = users.filter((user) => user.role === 'empleado')
+      const deletedStaffIds = new Set(JSON.parse(localStorage.getItem('fitzone.deleted.staff') ?? '[]') as string[])
+      const seededStaff = users.filter((user) => user.role === 'empleado' && !deletedStaffIds.has(user.id))
       setAvailableUsers([
         ...users.filter((user) => user.role !== 'empleado'),
         ...seededStaff.map((seed) => savedStaff.find((user) => user.id === seed.id) ?? seed),
-        ...savedStaff.filter((user) => !seededStaff.some((seed) => seed.id === user.id)),
+        ...savedStaff.filter((user) => !deletedStaffIds.has(user.id) && !seededStaff.some((seed) => seed.id === user.id)),
       ])
     } catch {
       localStorage.removeItem('fitzone.staff')
